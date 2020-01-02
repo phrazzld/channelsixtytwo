@@ -4,6 +4,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"math/rand"
 	"os"
@@ -14,12 +15,21 @@ import (
 )
 
 func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
-	paths := os.Args[1 : len(os.Args)-1]
-	num := os.Args[len(os.Args)-1:]
-	programs := randomPrograms(paths, num)
-	for i := 0; i < len(programs); i++ {
-		start(programs[i])
+	orderPtr := flag.Bool("o", false, "play episodes in order")
+	flag.Parse()
+	ordered := *orderPtr
+	arg := flag.Args()[0]
+
+	if ordered {
+		watchDir(arg)
+	} else {
+		rand.Seed(time.Now().UTC().UnixNano())
+		paths := os.Args[1 : len(os.Args)-1]
+		num := os.Args[len(os.Args)-1:]
+		programs := randomPrograms(paths, num)
+		for i := 0; i < len(programs); i++ {
+			start(programs[i])
+		}
 	}
 }
 
@@ -76,6 +86,17 @@ func randomProgram(base string) string {
 		os.Exit(1)
 	}
 	return program
+}
+
+func watchDir(base string) {
+	err := filepath.Walk(base, func(path string, info os.FileInfo, err error) error {
+		check(err)
+		if viable(path) {
+			start(path)
+		}
+		return nil
+	})
+	check(err)
 }
 
 func start(programs string) {
