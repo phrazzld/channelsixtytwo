@@ -15,21 +15,21 @@ import (
 )
 
 func main() {
-	orderPtr := flag.Bool("o", false, "play episodes in order")
+	shufflePtr := flag.Bool("shuffle", false, "play episodes at random")
 	flag.Parse()
-	ordered := *orderPtr
-	arg := flag.Args()[0]
+	shuffled := *shufflePtr
+	args := flag.Args()
 
-	if ordered {
-		watchDir(arg)
-	} else {
+	if shuffled {
 		rand.Seed(time.Now().UTC().UnixNano())
-		paths := os.Args[1 : len(os.Args)-1]
-		num := os.Args[len(os.Args)-1:]
+		paths := args[0 : len(args)-1]
+		num := args[len(args)-1:]
 		programs := randomPrograms(paths, num)
 		for i := 0; i < len(programs); i++ {
 			start(programs[i])
 		}
+	} else {
+		watchDir(args[0])
 	}
 }
 
